@@ -1,0 +1,14 @@
+### Readme for "Exact probability calculation with Cpp" ###
+
+0. Start Rstudio and make a new cpp file by selecting the icon in the toolbar. If not ready for cpp, Rstudio will indicate you to install something. If no icon for cpp, you should update Rstudio.
+1. Save a cpp file "latticeConnect.cpp" in your working directory.
+2. Read/run the R file "ExactCalc20150113.R", to get ready to evaluate upto n (max sample size) = 50.
+
+2. The top part is to read the cpp file and let R complile it as:
+>|r|
+library(Rcpp)
+library(RcppArmadillo)
+Rcpp::sourceCpp("latticeConnect.cpp", showOutput = TRUE, rebuild = FALSE)
+||<
+ Now you can use functions written with cpp in R.
+3. Read the R file with multiple R functions. It compares two cases.

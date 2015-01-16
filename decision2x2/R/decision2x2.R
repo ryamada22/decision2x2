@@ -123,6 +123,7 @@ prob.expected.3 <- function(x){
 #'
 #' Probability of better than target success rate-dependent self decision 
 #' @param x a vector of 4 elements
+#' @param target [0,1]
 #' @return probability to select A 
 #' @keywords NA
 #' @export
@@ -134,6 +135,59 @@ prob.expected.3 <- function(x){
 # Calculate probability for targetting people to select A 
 prob.self.3 <- function(x,target){ 
 	x. <- x+1
+	a <- pbeta(target,x.[,1],x.[,2],lower.tail=FALSE)
+	b <- pbeta(target,x.[,3],x.[,4],lower.tail=FALSE)
+	(sign(a-b)+1)/2
+}
+
+#' MLE
+#'
+#' MLE
+#' @param x a vector of 2 elements
+#' @return MLE
+#' @keywords NA
+#' @export
+#' @examples
+#' MLE(c(1,2))
+MLE <- function(x){
+	if(sum(x)==0){
+		return(0.5)
+	}else{
+		return(x[1]/sum(x))
+	}
+}
+#' Mean
+#'
+#' Mean
+#' @param x a vector of 2 elements
+#' @return Mean
+#' @keywords NA
+#' @export
+#' @examples
+#' MLE(c(1,2))
+Mean <- function(x){
+	x.[1]/(sum(x)+2)
+}
+
+#' Probability of better than target (target =max(expA,expB)+(1-max(expA,expB))*k) success rate-dependent self decision 
+#'
+#' Probability of better than target success rate-dependent self decision 
+#' @param x a vector of 4 elements
+#' @param k a coefficent to calculate target value
+#' @return probability to select A 
+#' @keywords NA
+#' @export
+#' @examples
+#' prob.self.3(c(1,2,3,4))
+
+# Decision rule gives prob to select arm A based on 4 numbers of each table.
+
+# Calculate probability for targetting people to select A 
+prob.self.opt.3 <- function(x,k){
+	x. <- x+1
+	eA <- x.[1]/(x.[1]+x.[2])
+	eB <- x.[2]/(x.[3]+x.[4])
+	target <- max(eA,eB) + (1-max(eA,eB))*k
 	a <- pbeta(target,x.[,1],x.[,2],lower.tail=FALSE)
 	b <- pbeta(target,x.[,3],x.[,4],lower.tail=FALSE)
 	(sign(a-b)+1)/2
@@ -265,6 +319,35 @@ prob.self.select <- function(tablist,target){
 	prob.select.exp <- list()
 	for(i in 1:n){
 		tmp <- lapply(tablist[[i]],prob.self.3,target)
+		prob.select.exp[[i]] <- list()
+		for(j in 1:length(tmp)){
+			prob.select.exp[[i]][[j]] <- matrix(tmp[[j]],j,i-j+1)
+		}
+	}
+	prob.select.exp
+}
+#' Make a list of self-decision selection probability with target variable based on the observation
+#'
+#' Make a list of self-decision selection probability with target variable based on the observation
+#' @param tablist list of matrices with 4 columns
+#' @param k  to determine target as target = MLE + (1-MLE)*k
+#' @return list of selection probability
+#' @keywords NA
+#' @export
+#' @examples
+#' N <- 20
+#' out <- serialTables(N)
+#' ks <- seq(from=0,to=1,by=0.1)
+#' prob.select.opt.selfs <- list()
+#' for(i in 1:length(targets)){
+#'  prob.select.opt.selfs[[i]] <- prob.self.opt.select(out[[2]],ks[i])
+#' }
+
+prob.self.opt.select <- function(tablist,k){
+	n <- length(tablist)
+	prob.select.exp <- list()
+	for(i in 1:n){
+		tmp <- lapply(tablist[[i]],prob.self.opt.3,k)
 		prob.select.exp[[i]] <- list()
 		for(j in 1:length(tmp)){
 			prob.select.exp[[i]][[j]] <- matrix(tmp[[j]],j,i-j+1)
